@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hayırlı İftarlar</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --gold: #e8c85a;
+            --gold2: #f5e27a;
+            --dark-blue: #03060f;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--dark-blue);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* ═══ CANVASES ═══ */
+        canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #bgCanvas {
+            z-index: 1;
+        }
+
+        #auroraCvs {
+            z-index: 2;
+            mix-blend-mode: screen;
+        }
+
+        #geoCvs {
+            z-index: 3;
+            opacity: 0.07;
+        }
+
+        #smokeCvs {
+            z-index: 4;
+        }
+
+        #fireflyCvs {
+            z-index: 5;
+        }
+
+        /* ═══ MOON ═══ */
+        .moon {
+            position: fixed;
+            top: 8%;
+            right: 10%;
+            width: clamp(70px, 12vw, 140px);
+            height: clamp(70px, 12vw, 140px);
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fff9d0 0%, #f5cc4a 50%, #c8922a 100%);
+            box-shadow:
+                0 0 0 3px rgba(245, 226, 122, 0.18),
+                0 0 40px 15px rgba(245, 204, 74, 0.45),
+                0 0 100px 40px rgba(245, 204, 74, 0.2),
+                0 0 200px 80px rgba(245, 204, 74, 0.08);
+            animation: moonRise 2.2s cubic-bezier(.22, 1, .36, 1) forwards,
+                moonBreath 4s ease-in-out 2.5s infinite alternate;
+            z-index: 8;
+        }
+
+        /* crater */
+        .moon::before {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            width: 22%;
+            height: 22%;
+            top: 20%;
+            left: 25%;
+            background: rgba(180, 130, 20, 0.25);
+            box-shadow: 30px 18px 0 rgba(180, 130, 20, 0.2), 14px 38px 0 rgba(180, 130, 20, 0.15);
+        }
+
+        /* moon reflection stripe on mosque */
+        .moon-ray {
+            position: fixed;
+            top: calc(8% + clamp(35px, 6vw, 70px));
+            right: calc(10% + clamp(35px, 6vw, 70px));
+            width: 3px;
+            height: 60vh;
+            background: linear-gradient(180deg, rgba(245, 226, 122, 0.18) 0%, transparent 100%);
+            transform-origin: top center;
+            transform: rotate(10deg);
+            z-index: 7;
+            opacity: 0;
+            animation: fadeIn 1s ease 3s forwards;
+            pointer-events: none;
+        }
+
+        /* ═══ CRESCENT DECO ═══ */
+        .crescent-deco {
+            position: fixed;
+            top: 5%;
+            left: 8%;
+            z-index: 8;
+            opacity: 0;
+            animation: crescentFloat 1.2s ease 2.2s forwards;
+            filter: drop-shadow(0 0 8px rgba(232, 200, 90, 0.5));
+            pointer-events: none;
+        }
+
+        @keyframes crescentFloat {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) rotate(-15deg);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+
+        /* ═══ STRING + LANTERNS ═══ */
+        .string-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    rgba(232, 200, 90, 0.6) 8%,
+                    rgba(232, 200, 90, 0.6) 92%,
+                    transparent 100%);
+            z-index: 10;
+            opacity: 0;
+            animation: fadeIn 0.8s ease 0.6s forwards;
+        }
+
+        .lanterns {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 4%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .lantern-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+        }
+
+        .rope {
+            width: 2px;
+            height: clamp(40px, 8vw, 90px);
+            background: linear-gradient(180deg, rgba(232, 200, 90, 0.7), rgba(232, 200, 90, 0.15));
+        }
+
+        .lantern-svg {
+            width: clamp(28px, 5vw, 56px);
+            filter: drop-shadow(0 0 14px rgba(255, 160, 0, 0.8));
+            transition: filter 0.4s;
+        }
+
+        /* ═══ MOSQUE ═══ */
+        .mosque-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 6;
+        }
+
+        .mosque-svg {
+            width: min(920px, 100vw);
+            opacity: 0;
+            animation: mosqueReveal 2.2s cubic-bezier(.22, 1, .36, 1) 0.4s forwards;
+        }
+
+        /* Ground glow under mosque */
+        .ground-glow {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(0deg, rgba(232, 200, 90, 0.08) 0%, transparent 100%);
+            z-index: 6;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeIn 2s ease 2s forwards;
+        }
+
+        /* ═══ MAIN CONTENT ═══ */
+        .content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 12;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .title {
+            font-family: 'Amiri', serif;
+            font-size: clamp(2.2rem, 6vw, 5.5rem);
+            color: #fff;
+            text-shadow: 0 0 40px rgba(232, 200, 90, 0.3), 0 2px 0 rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            animation: titleReveal 1.8s cubic-bezier(.22, 1, .36, 1) 1.2s forwards;
+            letter-spacing: 5px;
+        }
+
+        .title span {
+            color: var(--gold2);
+        }
+
+        .divider {
+            position: relative;
+            width: 0;
+            height: 2px;
+            margin: 14px auto;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            animation: dividerExpand 1.4s ease 2.2s forwards;
+            overflow: visible;
+        }
+
+        /* diamond on divider center */
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            transform: translate(-50%, -50%) rotate(45deg);
+            opacity: 0;
+            animation: fadeIn 0.5s ease 3.6s forwards;
+            box-shadow: 0 0 10px rgba(232, 200, 90, 0.8);
+        }
+
+        .subtitle {
+            font-size: clamp(0.7rem, 1.8vw, 0.95rem);
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: slideUp 1.2s ease 2.6s forwards;
+        }
+
+        .hadith {
+            margin-top: 20px;
+            max-width: min(480px, 88vw);
+            font-family: 'Amiri', serif;
+            font-size: clamp(0.88rem, 2vw, 1.08rem);
+            color: rgba(232, 200, 90, 0.82);
+            font-style: italic;
+            line-height: 2;
+            opacity: 0;
+            animation: slideUp 1.2s ease 3.1s forwards;
+        }
+
+        /* ═══ CITY SELECTOR ═══ */
+        .city-selector-wrap {
+            margin-top: 26px;
+            opacity: 0;
+            animation: slideUp 1.2s ease 3.5s forwards;
+            pointer-events: all;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .city-selector-wrap label {
+            font-size: clamp(0.68rem, 1.5vw, 0.82rem);
+            color: rgba(232, 200, 90, 0.7);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        #citySelect {
+            background: rgba(10, 20, 50, 0.7);
+            border: 1px solid rgba(232, 200, 90, 0.45);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(0.72rem, 1.5vw, 0.88rem);
+            padding: 8px 32px 8px 14px;
+            cursor: pointer;
+            outline: none;
+            backdrop-filter: blur(12px);
+            transition: border-color .35s, box-shadow .35s, transform .2s;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e8c85a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        #citySelect:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(232, 200, 90, 0.12), 0 0 20px rgba(232, 200, 90, 0.2);
+            transform: scale(1.02);
+        }
+
+        #citySelect option {
+            background: #070e24;
+            color: #fff;
+        }
+
+        /* ═══ FLIP COUNTDOWN ═══ */
+        .countdown-bar {
+            margin-top: 22px;
+            opacity: 0;
+            animation: slideUp 1.2s ease 3.9s forwards;
+            display: flex;
+            gap: clamp(8px, 2.5vw, 26px);
+            pointer-events: none;
+        }
+
+        .cd-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(232, 200, 90, 0.35);
+            border-radius: 14px;
+            padding: clamp(8px, 1.5vw, 14px) clamp(14px, 2.5vw, 22px);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cd-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(232, 200, 90, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .cd-num {
+            font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+            font-weight: 700;
+            color: var(--gold);
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            min-width: 2ch;
+            text-align: center;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .cd-num.flip {
+            animation: flipNum 0.22s ease forwards;
+        }
+
+        .cd-label {
+            font-size: clamp(0.52rem, 1.2vw, 0.68rem);
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .cd-status {
+            font-family: 'Amiri', serif;
+            font-size: clamp(0.82rem, 2vw, 1.05rem);
+            color: rgba(232, 200, 90, 0.72);
+            letter-spacing: 1px;
+            margin-top: 10px;
+            opacity: 0;
+            animation: slideUp 1s ease 4.3s forwards;
+        }
+
+        /* ═══ SHOOTING STAR overlays ═══ */
+        .shooting-star {
+            position: fixed;
+            border-radius: 1px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9;
+        }
+
+        /* ═══ KEYFRAMES ═══ */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(22px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes titleReveal {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+                letter-spacing: 12px;
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                letter-spacing: 5px;
+            }
+        }
+
+        @keyframes dividerExpand {
+            to {
+                width: clamp(110px, 26vw, 240px);
+            }
+        }
+
+        @keyframes moonRise {
+            from {
+                opacity: 0;
+                top: 28%;
+                transform: scale(0.6);
+            }
+
+            to {
+                opacity: 1;
+                top: 8%;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes moonBreath {
+            from {
+                box-shadow: 0 0 0 3px rgba(245, 226, 122, 0.18), 0 0 40px 15px rgba(245, 204, 74, 0.45), 0 0 100px 40px rgba(245, 204, 74, 0.18), 0 0 200px 80px rgba(245, 204, 74, 0.07);
+            }
+
+            to {
+                box-shadow: 0 0 0 6px rgba(245, 226, 122, 0.10), 0 0 60px 25px rgba(245, 204, 74, 0.65), 0 0 130px 60px rgba(245, 204, 74, 0.28), 0 0 260px 120px rgba(245, 204, 74, 0.10);
+            }
+        }
+
+        @keyframes mosqueReveal {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+                filter: blur(8px);
+            }
+
+            to {
+                opacity: 0.9;
+                transform: translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes flipNum {
+            0% {
+                transform: rotateX(0);
+                opacity: 1;
+            }
+
+            50% {
+                transform: rotateX(-90deg);
+                opacity: 0;
+            }
+
+            51% {
+                transform: rotateX(90deg);
+                opacity: 0;
+            }
+
+            100% {
+                transform: rotateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes swingA {
+
+            0%,
+            100% {
+                transform: rotate(-5deg);
+            }
+
+            50% {
+                transform: rotate(5deg);
+            }
+        }
+
+        @keyframes swingB {
+
+            0%,
+            100% {
+                transform: rotate(5deg);
+            }
+
+            50% {
+                transform: rotate(-5deg);
+            }
+        }
+
+        @keyframes shootStar {
+            0% {
+                opacity: 0;
+                transform: translate(0, 0);
+            }
+
+            8% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty));
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── CANVAS LAYERS ── -->
+    <canvas id="bgCanvas"></canvas>
+    <canvas id="auroraCvs"></canvas>
+    <canvas id="geoCvs"></canvas>
+    <canvas id="smokeCvs"></canvas>
+    <canvas id="fireflyCvs"></canvas>
+
+    <!-- Ay ışığı çizgisi -->
+    <div class="moon-ray"></div>
+    <!-- Yansıma zemin -->
+    <div class="ground-glow"></div>
+
+    <!-- İp hattı -->
+    <div class="string-line"></div>
+
+    <!-- ── FENERLER ── -->
+    <div class="lanterns">
+        <!-- Lantern 1 - Amber -->
+        <div class="lantern-wrap"
+            style="animation: dropIn 1s ease 0.8s forwards, swingA 4.2s ease-in-out 2.2s infinite;">
+            <div class="rope"></div>
+            <svg class="lantern-svg" viewBox="0 0 60 100" fill="none">
+                <defs>
+                    <radialGradient id="lg1" cx="50%" cy="38%" r="60%">
+                        <stop offset="0%" stop-color="#ffe580" />
+                        <stop offset="60%" stop-color="#e8800a" />
+                        <stop offset="100%" stop-color="#6b2800" />
+                    </radialGradient>
+                    <filter id="glow1">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+                <rect x="22" y="0" width="16" height="8" rx="3" fill="#e8c85a" />
+                <path d="M10 18 Q30 10 50 18 L52 74 Q30 84 8 74 Z" fill="url(#lg1)" />
+                <path d="M10 18 Q30 10 50 18" stroke="#f5e27a" stroke-width="1.5" fill="none" />
+                <path d="M8 74 Q30 84 52 74" stroke="#f5e27a" stroke-width="1.5" fill="none" />
+                <line x1="18" y1="18" x2="13" y2="74" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <line x1="30" y1="10" x2="30" y2="84" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <line x1="42" y1="18" x2="47" y2="74" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <rect x="24" y="74" width="12" height="14" rx="2" fill="#8b3e00" />
+                <ellipse cx="30" cy="46" rx="16" ry="5" fill="rgba(255,230,100,0.18)" />
+                <circle cx="30" cy="46" r="4" fill="#fff8b0" opacity="0.85" filter="url(#glow1)" />
+            </svg>
+        </div>
+
+        <!-- Lantern 2 - Ruby -->
+        <div class="lantern-wrap"
+            style="animation: dropIn 1s ease 1.1s forwards, swingB 3.6s ease-in-out 2.2s infinite;">
+            <div class="rope"></div>
+            <svg class="lantern-svg" viewBox="0 0 60 100" fill="none">
+                <defs>
+                    <radialGradient id="lg2" cx="50%" cy="38%" r="60%">
+                        <stop offset="0%" stop-color="#ffa0a0" />
+                        <stop offset="55%" stop-color="#cc0022" />
+                        <stop offset="100%" stop-color="#550010" />
+                    </radialGradient>
+                </defs>
+                <rect x="22" y="0" width="16" height="8" rx="3" fill="#e8c85a" />
+                <path d="M10 18 Q30 10 50 18 L52 74 Q30 84 8 74 Z" fill="url(#lg2)" />
+                <path d="M10 18 Q30 10 50 18" stroke="#f5e27a" stroke-width="1.5" fill="none" />
+                <path d="M8 74 Q30 84 52 74" stroke="#f5e27a" stroke-width="1.5" fill="none" />
+                <line x1="18" y1="18" x2="13" y2="74" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <line x1="30" y1="10" x2="30" y2="84" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <line x1="42" y1="18" x2="47" y2="74" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <rect x="24" y="74" width="12" height="14" rx="2" fill="#440010" />
+                <circle cx="30" cy="46" r="4" fill="#ffe0e0" opacity="0.8" />
+            </svg>
+        </div>
+
+        <!-- Lantern 3 - Gold (center, bigger) -->
+        <div class="lantern-wrap"
+            style="animation: dropIn 1s ease 1.4s forwards, swingA 5.2s ease-in-out 2.2s infinite;">
+            <div class="rope" style="height:clamp(55px,11vw,120px);"></div>
+            <svg class="lantern-svg" style="width:clamp(40px,7.5vw,76px);" viewBox="0 0 60 100" fill="none">
+                <defs>
+                    <radialGradient id="lg3" cx="50%" cy="32%" r="65%">
+                        <stop offset="0%" stop-color="#fff5a0" />
+                        <stop offset="45%" stop-color="#f0c020" />
+                        <stop offset="100%" stop-color="#9a5a00" />
+                    </radialGradient>
+                    <filter id="glow3">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+                <rect x="20" y="0" width="20" height="10" rx="4" fill="#e8c85a" />
+                <path d="M8 20 Q30 8 52 20 L55 76 Q30 88 5 76 Z" fill="url(#lg3)" />
+                <path d="M8 20 Q30 8 52 20" stroke="#fff0a0" stroke-width="2" fill="none" />
+                <path d="M5 76 Q30 88 55 76" stroke="#fff0a0" stroke-width="2" fill="none" />
+                <line x1="16" y1="20" x2="10" y2="76" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" />
+                <line x1="30" y1="8" x2="30" y2="88" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" />
+                <line x1="44" y1="20" x2="50" y2="76" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" />
+                <ellipse cx="30" cy="50" rx="20" ry="6" fill="rgba(255,240,80,0.22)" />
+                <rect x="22" y="76" width="16" height="16" rx="3" fill="#7a3e00" />
+                <circle cx="30" cy="50" r="6" fill="#fffde0" opacity="0.9" filter="url(#glow3)" />
+            </svg>
+        </div>
+
+        <!-- Lantern 4 - Emerald -->
+        <div class="lantern-wrap"
+            style="animation: dropIn 1s ease 1.7s forwards, swingB 4.4s ease-in-out 2.2s infinite;">
+            <div class="rope"></div>
+            <svg class="lantern-svg" viewBox="0 0 60 100" fill="none">
+                <defs>
+                    <radialGradient id="lg4" cx="50%" cy="38%" r="60%">
+                        <stop offset="0%" stop-color="#90ffcc" />
+                        <stop offset="55%" stop-color="#008844" />
+                        <stop offset="100%" stop-color="#003a1a" />
+                    </radialGradient>
+                </defs>
+                <rect x="22" y="0" width="16" height="8" rx="3" fill="#e8c85a" />
+                <path d="M10 18 Q30 10 50 18 L52 74 Q30 84 8 74 Z" fill="url(#lg4)" />
+                <path d="M10 18 Q30 10 50 18" stroke="#f5e27a" stroke-width="1.5" fill="none" />
+                <path d="M8 74 Q30 84 52 74" stroke="#f5e27a" stroke-width="1.5" fill="none" />
+                <line x1="18" y1="18" x2="13" y2="74" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <line x1="30" y1="10" x2="30" y2="84" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <line x1="42" y1="18" x2="47" y2="74" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <rect x="24" y="74" width="12" height="14" rx="2" fill="#002a10" />
+                <circle cx="30" cy="46" r="4" fill="#c0ffe8" opacity="0.8" />
+            </svg>
+        </div>
+
+        <!-- Lantern 5 - Sapphire -->
+        <div class="lantern-wrap"
+            style="animation: dropIn 1s ease 2.0s forwards, swingA 3.9s ease-in-out 2.2s infinite;">
+            <div class="rope"></div>
+            <svg class="lantern-svg" viewBox="0 0 60 100" fill="none">
+                <defs>
+                    <radialGradient id="lg5" cx="50%" cy="38%" r="60%">
+                        <stop offset="0%" stop-color="#c0b0ff" />
+                        <stop offset="55%" stop-color="#5522cc" />
+                        <stop offset="100%" stop-color="#1a0055" />
+                    </radialGradient>
+                </defs>
+                <rect x="22" y="0" width="16" height="8" rx="3" fill="#e8c85a" />
+                <path d="M10 18 Q30 10 50 18 L52 74 Q30 84 8 74 Z" fill="url(#lg5)" />
+                <path d="M10 18 Q30 10 50 18" stroke="#f5e27a" stroke-width="1.5" fill="none" />
+                <path d="M8 74 Q30 84 52 74" stroke="#f5e27a" stroke-width="1.5" fill="none" />
+                <line x1="18" y1="18" x2="13" y2="74" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <line x1="30" y1="10" x2="30" y2="84" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <line x1="42" y1="18" x2="47" y2="74" stroke="rgba(0,0,0,0.18)" stroke-width="1" />
+                <rect x="24" y="74" width="12" height="14" rx="2" fill="#100044" />
+                <circle cx="30" cy="46" r="4" fill="#e8e0ff" opacity="0.8" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Moon -->
+    <div class="moon"></div>
+
+    <!-- Crescent deco -->
+    <div class="crescent-deco">
+        <svg width="clamp(40px,6vw,64px)" height="clamp(40px,6vw,64px)" viewBox="0 0 70 70" fill="none">
+            <path d="M52 14 A28 28 0 1 0 56 56 A18 18 0 1 1 52 14 Z" fill="#e8c85a" opacity="0.75" />
+        </svg>
+    </div>
+
+    <!-- Mosque -->
+    <div class="mosque-wrapper">
+        <svg class="mosque-svg" viewBox="0 0 920 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="mosqueGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#1e3368" />
+                    <stop offset="100%" stop-color="#03060f" />
+                </linearGradient>
+                <linearGradient id="minaretGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#0e1e40" />
+                    <stop offset="50%" stop-color="#1e3368" />
+                    <stop offset="100%" stop-color="#0e1e40" />
+                </linearGradient>
+                <!-- Moon glow on mosque -->
+                <radialGradient id="moonReflect" cx="80%" cy="0%" r="80%">
+                    <stop offset="0%" stop-color="rgba(245,226,122,0.08)" />
+                    <stop offset="100%" stop-color="rgba(245,226,122,0)" />
+                </radialGradient>
+            </defs>
+            <!-- Moon light overlay -->
+            <rect x="0" y="0" width="920" height="300" fill="url(#moonReflect)" opacity="0.6" />
+            <!-- Main body -->
+            <rect x="315" y="115" width="290" height="185" fill="url(#mosqueGrad)" />
+            <!-- Main dome -->
+            <ellipse cx="460" cy="115" rx="104" ry="82" fill="url(#mosqueGrad)" />
+            <!-- Side domes -->
+            <ellipse cx="315" cy="155" rx="64" ry="48" fill="url(#mosqueGrad)" />
+            <ellipse cx="605" cy="155" rx="64" ry="48" fill="url(#mosqueGrad)" />
+            <!-- Minarets -->
+            <rect x="232" y="55" width="30" height="205" rx="7" fill="url(#minaretGrad)" />
+            <ellipse cx="247" cy="55" rx="19" ry="11" fill="#1e3368" />
+            <polygon points="247,24 233,57 261,57" fill="#1e3368" />
+            <line x1="247" y1="24" x2="247" y2="16" stroke="#e8c85a" stroke-width="1.5" />
+            <circle cx="247" cy="15" r="2.5" fill="#e8c85a" />
+            <rect x="658" y="55" width="30" height="205" rx="7" fill="url(#minaretGrad)" />
+            <ellipse cx="673" cy="55" rx="19" ry="11" fill="#1e3368" />
+            <polygon points="673,24 659,57 687,57" fill="#1e3368" />
+            <line x1="673" y1="24" x2="673" y2="16" stroke="#e8c85a" stroke-width="1.5" />
+            <circle cx="673" cy="15" r="2.5" fill="#e8c85a" />
+            <!-- Outer minarets -->
+            <rect x="100" y="95" width="24" height="205" rx="6" fill="url(#minaretGrad)" />
+            <polygon points="112,68 100,97 124,97" fill="#1e3368" />
+            <line x1="112" y1="68" x2="112" y2="60" stroke="#e8c85a" stroke-width="1.2" />
+            <circle cx="112" cy="59" r="2" fill="#e8c85a" />
+            <rect x="796" y="95" width="24" height="205" rx="6" fill="url(#minaretGrad)" />
+            <polygon points="808,68 796,97 820,97" fill="#1e3368" />
+            <line x1="808" y1="68" x2="808" y2="60" stroke="#e8c85a" stroke-width="1.2" />
+            <circle cx="808" cy="59" r="2" fill="#e8c85a" />
+            <!-- Windows/arches -->
+            <path d="M385 300 L385 218 Q460 176 535 218 L535 300 Z" fill="#060e28" opacity="0.85" />
+            <path d="M274 300 L274 238 Q315 212 356 238 L356 300 Z" fill="#060e28" opacity="0.85" />
+            <path d="M564 300 L564 238 Q605 212 646 238 L646 300 Z" fill="#060e28" opacity="0.85" />
+            <!-- Dome crescent + rod -->
+            <line x1="460" y1="36" x2="460" y2="20" stroke="#e8c85a" stroke-width="2.2" />
+            <path d="M465 20 A11 11 0 1 0 465 -2 A7 7 0 1 1 465 20 Z" fill="#e8c85a" />
+            <!-- Window lights (glow effect) -->
+            <ellipse cx="460" cy="218" rx="28" ry="8" fill="rgba(245,226,122,0.07)" />
+            <ellipse cx="315" cy="238" rx="16" ry="5" fill="rgba(245,226,122,0.05)" />
+            <ellipse cx="605" cy="238" rx="16" ry="5" fill="rgba(245,226,122,0.05)" />
+        </svg>
+    </div>
+
+    <!-- ── MAIN CONTENT ── -->
+    <div class="content">
+        <div class="title">Hayırlı <span>İftarlar</span></div>
+        <div class="divider"></div>
+        <div class="subtitle">Mübarek Ramazan Ayınız</div>
+
+        <div class="hadith">
+            "Oruçlunun iftarda ettiği duası<br>
+            reddolunmaz." <em>— Hz. Peygamber </em>
+        </div>
+
+        <div class="city-selector-wrap">
+            <label for="citySelect">🌙 Şehir:</label>
+            <select id="citySelect">
+                <option value="Adana">Adana</option>
+                <option value="Adıyaman">Adıyaman</option>
+                <option value="Afyonkarahisar">Afyonkarahisar</option>
+                <option value="Ağrı">Ağrı</option>
+                <option value="Ankara" selected>Ankara</option>
+                <option value="Antalya">Antalya</option>
+                <option value="Artvin">Artvin</option>
+                <option value="Aydın">Aydın</option>
+                <option value="Balıkesir">Balıkesir</option>
+                <option value="Bursa">Bursa</option>
+                <option value="Çorum">Çorum</option>
+                <option value="Denizli">Denizli</option>
+                <option value="Diyarbakır">Diyarbakır</option>
+                <option value="Edirne">Edirne</option>
+                <option value="Elazığ">Elazığ</option>
+                <option value="Erzincan">Erzincan</option>
+                <option value="Erzurum">Erzurum</option>
+                <option value="Eskişehir">Eskişehir</option>
+                <option value="Gaziantep">Gaziantep</option>
+                <option value="Giresun">Giresun</option>
+                <option value="Hatay">Hatay</option>
+                <option value="İstanbul">İstanbul</option>
+                <option value="İzmir">İzmir</option>
+                <option value="Kahramanmaraş">Kahramanmaraş</option>
+                <option value="Kastamonu">Kastamonu</option>
+                <option value="Kayseri">Kayseri</option>
+                <option value="Konya">Konya</option>
+                <option value="Malatya">Malatya</option>
+                <option value="Manisa">Manisa</option>
+                <option value="Mersin">Mersin</option>
+                <option value="Muğla">Muğla</option>
+                <option value="Ordu">Ordu</option>
+                <option value="Rize">Rize</option>
+                <option value="Sakarya">Sakarya</option>
+                <option value="Samsun">Samsun</option>
+                <option value="Şanlıurfa">Şanlıurfa</option>
+                <option value="Siirt">Siirt</option>
+                <option value="Sivas">Sivas</option>
+                <option value="Tekirdağ">Tekirdağ</option>
+                <option value="Trabzon">Trabzon</option>
+                <option value="Van">Van</option>
+                <option value="Zonguldak">Zonguldak</option>
+            </select>
+        </div>
+
+        <div class="countdown-bar" id="countdownBar">
+            <div class="cd-box">
+                <div class="cd-num" id="cd-h">--</div>
+                <div class="cd-label">Saat</div>
+            </div>
+            <div class="cd-box">
+                <div class="cd-num" id="cd-m">--</div>
+                <div class="cd-label">Dakika</div>
+            </div>
+            <div class="cd-box">
+                <div class="cd-num" id="cd-s">--</div>
+                <div class="cd-label">Saniye</div>
+            </div>
+        </div>
+
+        <div class="cd-status" id="cdStatus"></div>
+    </div>
+
+    <script>
+        /* ═══════════════════════════════════════════════════════
+           1. STAR CANVAS  — yıldızlar + kayan yıldızlar
+        ═══════════════════════════════════════════════════════ */
+        (function () {
+            const cvs = document.getElementById('bgCanvas');
+            const ctx = cvs.getContext('2d');
+            let W, H, stars = [];
+
+            function resize() {
+                W = cvs.width = innerWidth; H = cvs.height = innerHeight;
+                stars = [];
+                const n = Math.floor(W * H / 1600);
+                for (let i = 0; i < n; i++) stars.push({
+                    x: Math.random() * W, y: Math.random() * H,
+                    r: Math.random() * 1.6 + 0.2,
+                    a: Math.random(),
+                    da: (Math.random() * 0.005 + 0.002) * (Math.random() < .5 ? 1 : -1),
+                    col: Math.random() < .15 ? `255,220,120` : `255,248,200`
+                });
+            }
+
+            let shootT = 0, lastShoot = 0;
+            function shoot() {
+                const el = document.createElement('div');
+                el.className = 'shooting-star';
+                const sx = Math.random() * W * .65, sy = Math.random() * H * .3;
+                const ang = (28 + Math.random() * 24) * Math.PI / 180;
+                const d = 180 + Math.random() * 320;
+                el.style.cssText = `
+      left:${sx}px;top:${sy}px;
+      --tx:${Math.cos(ang) * d}px;--ty:${Math.sin(ang) * d}px;
+      animation:shootStar ${.7 + Math.random() * .55}s ease-out forwards;
+      width:${70 + Math.random() * 100}px;height:2px;
+      background:linear-gradient(90deg,rgba(255,255,255,0),#fffde8 75%,rgba(255,255,255,0.9));
+    `;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1400);
+            }
+
+            function loop(ts) {
+                if (!lastShoot) lastShoot = ts;
+                ctx.clearRect(0, 0, W, H);
+
+                // deep sky gradient
+                const g = ctx.createLinearGradient(0, 0, 0, H);
+                g.addColorStop(0, '#01040c');
+                g.addColorStop(.45, '#04091e');
+                g.addColorStop(1, '#08122a');
+                ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+                // subtle horizon warmth
+                const hw = ctx.createLinearGradient(0, H * .7, 0, H);
+                hw.addColorStop(0, 'rgba(60,20,5,0)');
+                hw.addColorStop(1, 'rgba(100,35,5,0.12)');
+                ctx.fillStyle = hw; ctx.fillRect(0, H * .7, W, H * .3);
+
+                // stars
+                stars.forEach(s => {
+                    s.a += s.da; if (s.a > 1 || s.a < 0) s.da *= -1;
+                    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${s.col},${Math.max(0, s.a)})`;
+                    ctx.fill();
+                });
+
+                // star clusters (occasional bright pair)
+                if (ts - lastShoot > 3200 + Math.random() * 5000) { lastShoot = ts; shoot(); }
+                requestAnimationFrame(loop);
+            }
+
+            window.addEventListener('resize', resize);
+            resize(); requestAnimationFrame(loop);
+        })();
+
+        /* ═══════════════════════════════════════════════════════
+           2. AURORA CANVAS  — yumuşak ışık dalgaları
+        ═══════════════════════════════════════════════════════ */
+        (function () {
+            const cvs = document.getElementById('auroraCvs');
+            const ctx = cvs.getContext('2d');
+            let W, H;
+            const waves = [
+                { base: 0.35, amp: 0.07, speed: 0.00028, phase: 0, color: 'rgba(30,50,180,0.18)' },
+                { base: 0.45, amp: 0.09, speed: 0.00021, phase: 2.1, color: 'rgba(80,20,140,0.12)' },
+                { base: 0.28, amp: 0.06, speed: 0.00035, phase: 4.2, color: 'rgba(10,80,60,0.10)' },
+            ];
+
+            function resize() { W = cvs.width = innerWidth; H = cvs.height = innerHeight; }
+
+            function loop(ts) {
+                ctx.clearRect(0, 0, W, H);
+                waves.forEach(wv => {
+                    const y0 = (wv.base + Math.sin(ts * wv.speed + wv.phase) * wv.amp) * H;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y0);
+                    for (let x = 0; x <= W; x += 4) {
+                        const yy = y0 + Math.sin(x / W * Math.PI * 3 + ts * wv.speed * 2 + wv.phase) * H * 0.035;
+                        ctx.lineTo(x, yy);
+                    }
+                    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+                    ctx.fillStyle = wv.color; ctx.fill();
+                });
+                requestAnimationFrame(loop);
+            }
+
+            window.addEventListener('resize', resize);
+            resize(); requestAnimationFrame(loop);
+        })();
+
+        /* ═══════════════════════════════════════════════════════
+           3. GEO CANVAS  — İslami geometrik kafes deseni
+        ═══════════════════════════════════════════════════════ */
+        (function () {
+            const cvs = document.getElementById('geoCvs');
+            const ctx = cvs.getContext('2d');
+            let W, H;
+
+            function resize() {
+                W = cvs.width = innerWidth; H = cvs.height = innerHeight;
+                draw();
+            }
+
+            function drawStar8(cx, cy, r1, r2) {
+                ctx.beginPath();
+                for (let i = 0; i < 16; i++) {
+                    const ang = (i * Math.PI / 8) - Math.PI / 2;
+                    const r = i % 2 === 0 ? r1 : r2;
+                    const x = cx + r * Math.cos(ang), y = cy + r * Math.sin(ang);
+                    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                ctx.strokeStyle = 'rgba(232,200,90,1)'; ctx.lineWidth = 1;
+                const gs = Math.floor(Math.max(W, H) / 6);
+                for (let gy = -gs; gy < H + gs; gy += gs) {
+                    for (let gx = -gs; gx < W + gs; gx += gs) {
+                        drawStar8(gx, gy, gs * 0.38, gs * 0.16);
+                        ctx.stroke();
+                        // connecting lines
+                        ctx.beginPath();
+                        ctx.moveTo(gx - gs * 0.38, gy); ctx.lineTo(gx - gs / 2, gy);
+                        ctx.moveTo(gx + gs * 0.38, gy); ctx.lineTo(gx + gs / 2, gy);
+                        ctx.moveTo(gx, gy - gs * 0.38); ctx.lineTo(gx, gy - gs / 2);
+                        ctx.moveTo(gx, gy + gs * 0.38); ctx.lineTo(gx, gy + gs / 2);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+        })();
+
+        /* ═══════════════════════════════════════════════════════
+           4. SMOKE CANVAS  — minarelerden yükselen duman
+        ═══════════════════════════════════════════════════════ */
+        (function () {
+            const cvs = document.getElementById('smokeCvs');
+            const ctx = cvs.getContext('2d');
+            let W, H;
+            const sources = [];
+
+            function resize() {
+                W = cvs.width = innerWidth; H = cvs.height = innerHeight;
+                sources.length = 0;
+                // Approx minaret tip positions (relative to viewport)
+                const mW = Math.min(920, W);
+                const offL = (W - mW) / 2;
+                const tips = [
+                    { x: offL + mW * 0.112, y: H - (H * 0.68) },  // sol dış minare
+                    { x: offL + mW * 0.255, y: H - (H * 0.73) },  // sol iç minare
+                    { x: offL + mW * 0.500, y: H - (H * 0.95) },  // orta kubbe
+                    { x: offL + mW * 0.740, y: H - (H * 0.73) },  // sağ iç minare
+                    { x: offL + mW * 0.868, y: H - (H * 0.68) },  // sağ dış minare
+                ];
+                tips.forEach(t => sources.push({ ...t, particles: [] }));
+            }
+
+            class SmokePart {
+                constructor(sx, sy) {
+                    this.x = sx + (Math.random() - .5) * 6;
+                    this.y = sy;
+                    this.vx = (Math.random() - .5) * .4;
+                    this.vy = -(Math.random() * .8 + 0.4);
+                    this.r = Math.random() * 6 + 3;
+                    this.a = Math.random() * .15 + .04;
+                    this.life = 0;
+                    this.maxLife = Math.random() * 120 + 80;
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy;
+                    this.vx += (Math.random() - .5) * .05;
+                    this.r += .08; this.life++;
+                }
+                draw(ctx) {
+                    const t = this.life / this.maxLife;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(180,160,120,${this.a * (1 - t)})`;
+                    ctx.fill();
+                }
+            }
+
+            let lastEmit = 0;
+            function loop(ts) {
+                ctx.clearRect(0, 0, W, H);
+                if (ts - lastEmit > 80) {
+                    lastEmit = ts;
+                    sources.forEach(s => {
+                        if (Math.random() < .5) s.particles.push(new SmokePart(s.x, s.y));
+                    });
+                }
+                sources.forEach(s => {
+                    s.particles = s.particles.filter(p => p.life < p.maxLife);
+                    s.particles.forEach(p => { p.update(); p.draw(ctx); });
+                });
+                requestAnimationFrame(loop);
+            }
+
+            window.addEventListener('resize', resize);
+            resize(); requestAnimationFrame(loop);
+        })();
+
+        /* ═══════════════════════════════════════════════════════
+           5. FIREFLY CANVAS  — altın ateşböceği partikülleri
+        ═══════════════════════════════════════════════════════ */
+        (function () {
+            const cvs = document.getElementById('fireflyCvs');
+            const ctx = cvs.getContext('2d');
+            let W, H;
+
+            function resize() { W = cvs.width = innerWidth; H = cvs.height = innerHeight; }
+
+            class Fly {
+                constructor() {
+                    this.x = Math.random() * W;
+                    this.y = Math.random() * H;
+                    this.vx = (Math.random() - .5) * .55;
+                    this.vy = (Math.random() - .5) * .45;
+                    this.r = Math.random() * 2.2 + .6;
+                    this.baseA = Math.random() * .55 + .15;
+                    this.phase = Math.random() * Math.PI * 2;
+                    this.spd = Math.random() * .03 + .015;
+                    this.col = Math.random() < .6 ? [232, 200, 90] : [255, 255, 180];
+                }
+                update(ts) {
+                    this.x += this.vx; this.y += this.vy;
+                    if (this.x < 0) this.x = W; if (this.x > W) this.x = 0;
+                    if (this.y < 0) this.y = H; if (this.y > H) this.y = 0;
+                    this.vx += (Math.random() - .5) * .06;
+                    this.vy += (Math.random() - .5) * .06;
+                    this.vx = Math.max(-1, Math.min(1, this.vx));
+                    this.vy = Math.max(-.8, Math.min(.8, this.vy));
+                }
+                draw(ts) {
+                    const a = this.baseA * (0.5 + 0.5 * Math.sin(ts * this.spd + this.phase));
+                    const [r, g, b] = this.col;
+                    // glow
+                    const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 5);
+                    grd.addColorStop(0, `rgba(${r},${g},${b},${a})`);
+                    grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.r * 5, 0, Math.PI * 2);
+                    ctx.fillStyle = grd; ctx.fill();
+                    // core
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${r},${g},${b},${Math.min(1, a * 3)})`; ctx.fill();
+                }
+            }
+
+            const flies = Array.from({ length: 65 }, () => new Fly());
+
+            function loop(ts) {
+                ctx.clearRect(0, 0, W, H);
+                flies.forEach(f => { f.update(ts); f.draw(ts); });
+                requestAnimationFrame(loop);
+            }
+
+            window.addEventListener('resize', resize);
+            resize(); requestAnimationFrame(loop);
+        })();
+
+        /* ═══════════════════════════════════════════════════════
+           6. FLIP COUNTDOWN  — sayı değişiminde flip animasyonu
+        ═══════════════════════════════════════════════════════ */
+        let iftarTime = null, cdInt = null;
+        const hEl = document.getElementById('cd-h');
+        const mEl = document.getElementById('cd-m');
+        const sEl = document.getElementById('cd-s');
+        const statusEl = document.getElementById('cdStatus');
+        const cityEl = document.getElementById('citySelect');
+
+        function pad(n) { return String(n).padStart(2, '0'); }
+
+        function setFlip(el, val) {
+            const s = pad(val);
+            if (el.textContent === s) return;
+            el.classList.remove('flip');
+            void el.offsetWidth; // force reflow
+            el.classList.add('flip');
+            setTimeout(() => { el.textContent = s; el.classList.remove('flip'); }, 110);
+        }
+
+        function tick() {
+            if (!iftarTime) return;
+            const now = new Date(), diff = iftarTime - now;
+            if (diff <= 0) {
+                [hEl, mEl, sEl].forEach(e => { e.textContent = '00'; });
+                statusEl.textContent = '🌙 Hayırlı İftarlar! Bismillah…';
+                statusEl.style.color = '#e8c85a';
+                clearInterval(cdInt);
+                // Celebrate particles burst
+                launchCelebration();
+                return;
+            }
+            const tot = Math.floor(diff / 1000);
+            setFlip(hEl, Math.floor(tot / 3600));
+            setFlip(mEl, Math.floor((tot % 3600) / 60));
+            setFlip(sEl, tot % 60);
+        }
+
+        function launchCelebration() {
+            for (let i = 0; i < 18; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'shooting-star';
+                    const sx = Math.random() * innerWidth;
+                    const sy = innerHeight * (.2 + Math.random() * .5);
+                    const ang = (Math.random() * 360) * Math.PI / 180;
+                    const d = 80 + Math.random() * 180;
+                    el.style.cssText = `
+        left:${sx}px;top:${sy}px;
+        --tx:${Math.cos(ang) * d}px;--ty:${Math.sin(ang) * d}px;
+        animation:shootStar 1s ease-out forwards;
+        width:${40 + Math.random() * 60}px;height:2px;
+        background:linear-gradient(90deg,rgba(232,200,90,0),rgba(232,200,90,0.9));
+      `;
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 1100);
+                }, i * 120);
+            }
+        }
+
+        async function fetchIftar(city) {
+            statusEl.textContent = '⏳ İftar saati alınıyor…';
+            statusEl.style.color = 'rgba(232,200,90,0.6)';
+            [hEl, mEl, sEl].forEach(e => e.textContent = '--');
+            if (cdInt) clearInterval(cdInt);
+            iftarTime = null;
+
+            try {
+                const now = new Date();
+                const dd = String(now.getDate()).padStart(2, '0');
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const yyyy = now.getFullYear();
+                const url = `https://api.aladhan.com/v1/timingsByCity/${dd}-${mm}-${yyyy}?city=${encodeURIComponent(city)}&country=Turkey&method=13`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.code !== 200) throw new Error();
+
+                const mag = data.data.timings.Maghrib;
+                const [mH, mM] = mag.split(':').map(Number);
+                iftarTime = new Date(now);
+                iftarTime.setHours(mH, mM, 0, 0);
+
+                statusEl.textContent = `🕌 ${city} İftar Vakti: ${mag}`;
+                statusEl.style.color = 'rgba(232,200,90,0.75)';
+                tick();
+                cdInt = setInterval(tick, 1000);
+            } catch {
+                statusEl.textContent = '❌ İftar saati alınamadı. İnternet bağlantısını kontrol edin.';
+                statusEl.style.color = 'rgba(255,90,90,0.8)';
+            }
+        }
+
+        cityEl.addEventListener('change', () => fetchIftar(cityEl.value));
+        fetchIftar(cityEl.value);
+    </script>
+</body>
+
+</html>
