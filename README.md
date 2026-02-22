@@ -6,7 +6,7 @@ Bu proje, **Mahmut Ünüvar** tarafından oluşturulmuştur.
 
 ## 📌 Proje Hakkında
 
-Ramazan ayına özel, tam ekran animasyon tabanlı bir **HTML/CSS/JavaScript** tebrik sayfasıdır.
+Ramazan ayına özel, tam ekran animasyon tabanlı bir **HTML/CSS/JavaScript** sayfadır.
 
 ## ✨ Özellikler
 
@@ -33,3 +33,4 @@ Ramazan ayına özel, tam ekran animasyon tabanlı bir **HTML/CSS/JavaScript** t
 **Geliştirici:** Mahmut Ünüvar  
 **Tarih:** Şubat 2026  
 **Lisans:** Serbest kullanım
+
